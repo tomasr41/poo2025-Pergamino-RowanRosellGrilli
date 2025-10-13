@@ -1,4 +1,4 @@
-package com.example.demo.entity;
+package com.ar.edu.unnoba.poo2025.torneos.models;
 
 import jakarta.persistence.*;
 import lombok.Getter;
@@ -21,11 +21,7 @@ public class Usuario {
     @Column(nullable = false, length = 100)
     private String contraseña;
 
-    @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
-    private Rol rol;
-
-    public enum Rol {
-        ADMIN, PARTICIPANTE
-    }
+    private String rol;
 }
+

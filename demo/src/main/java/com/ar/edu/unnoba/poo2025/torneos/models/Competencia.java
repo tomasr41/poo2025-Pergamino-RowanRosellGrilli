@@ -1,4 +1,4 @@
-package com.example.demo.entity;
+package com.ar.edu.unnoba.poo2025.torneos.models;
 
 import java.util.ArrayList;
 import java.util.List;
