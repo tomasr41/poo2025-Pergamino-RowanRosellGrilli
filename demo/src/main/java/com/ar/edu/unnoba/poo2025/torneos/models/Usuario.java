@@ -15,13 +15,13 @@ public class Usuario {
     @Column(name = "id_usuario")
     private Long idUsuario;
 
-    @Column(nullable = false, unique = true, length = 100)
+    @Column(name = "email", nullable = false, unique = true, length = 100)
     private String email;
 
-    @Column(nullable = false, length = 100)
+    @Column(name = "contraseña", nullable = false, length = 100)
     private String contraseña;
 
-    @Column(nullable = false, length = 20)
+    @Column(name = "rol", nullable = false, length = 20)
     private String rol;
 }
 

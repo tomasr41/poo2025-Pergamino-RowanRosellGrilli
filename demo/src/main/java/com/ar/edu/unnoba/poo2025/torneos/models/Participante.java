@@ -15,10 +15,10 @@ public class Participante {
     @Column(name = "id_participante")
     private Long idParticipante;
 
-    @Column(nullable = false, length = 50)
+    @Column(name = "nombre", nullable = false, length = 50)
     private String nombre;
 
-    @Column(nullable = false, length = 50)
+    @Column(name = "apellido", nullable = false, length = 50)
     private String apellido;
 
     @Column(name = "tipo_documento", length = 20)
