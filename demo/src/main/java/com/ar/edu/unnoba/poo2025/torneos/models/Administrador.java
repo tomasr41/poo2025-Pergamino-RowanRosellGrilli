@@ -7,26 +7,29 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Entity
-@Table(name = "administrador")
+@DiscriminatorValue("ADMIN")
 @Getter
 @Setter
-public class Administrador {
+public class Administrador extends Usuario {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "id_admin")
-    private Long idAdmin;
-
-    @OneToOne
-    @JoinColumn(name = "id_usuario", nullable = false, unique = true)
-    private Usuario usuario;
+    //no se genera ID porque hereda de Usuario
 
     @OneToMany(mappedBy = "administrador", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Torneo> torneos = new ArrayList<>();
 
+    // Constructor vacío requerido por JPA
     public Administrador() {}
 
-    public Administrador(Usuario usuario) {
-        this.usuario = usuario;
+    // Constructor con argumentos
+    public Administrador(String email, String password) {
+        super.setEmail(email);
+        super.setPassword(password);
     }
 }
+
+
+
+
+
+
+
