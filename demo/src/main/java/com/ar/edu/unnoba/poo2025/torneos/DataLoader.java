@@ -3,9 +3,9 @@ package com.ar.edu.unnoba.poo2025.torneos;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 import com.ar.edu.unnoba.poo2025.torneos.models.Participante;
+import com.ar.edu.unnoba.poo2025.torneos.repository.AdministradorRepository;
+import com.ar.edu.unnoba.poo2025.torneos.repository.ParticipanteRepository;
 import com.ar.edu.unnoba.poo2025.torneos.models.Administrador;
-import com.ar.edu.unnoba.poo2025.torneos.repositories.ParticipanteRepository;
-import com.ar.edu.unnoba.poo2025.torneos.repositories.AdministradorRepository;
 
 @Component
 public class DataLoader implements CommandLineRunner {
