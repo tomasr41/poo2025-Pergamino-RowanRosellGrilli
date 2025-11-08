@@ -7,7 +7,7 @@ import com.ar.edu.unnoba.poo2025.torneos.repository.AdministradorRepository;
 import com.ar.edu.unnoba.poo2025.torneos.repository.ParticipanteRepository;
 import com.ar.edu.unnoba.poo2025.torneos.models.Administrador;
 
-@Component
+//Component
 public class DataLoader implements CommandLineRunner {
 
     private final ParticipanteRepository partRepo;

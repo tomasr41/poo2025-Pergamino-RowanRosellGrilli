@@ -3,7 +3,6 @@ package com.ar.edu.unnoba.poo2025.torneos.service;
 import com.ar.edu.unnoba.poo2025.torneos.models.Participante;
 import com.ar.edu.unnoba.poo2025.torneos.repository.ParticipanteRepository;
 import com.ar.edu.unnoba.poo2025.torneos.util.PasswordEncoder;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -14,7 +13,6 @@ public class ParticipantServiceImp implements ParticipantService {
     private final PasswordEncoder passwordEncoder;
 
   
-    @Autowired
     public ParticipantServiceImp(ParticipanteRepository participanteRepository, PasswordEncoder passwordEncoder) {
         this.participanteRepository = participanteRepository;
         this.passwordEncoder = passwordEncoder;
