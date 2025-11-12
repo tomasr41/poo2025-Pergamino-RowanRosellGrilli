@@ -4,6 +4,7 @@ import com.ar.edu.unnoba.poo2025.torneos.util.PasswordEncoder; // Importas tu cl
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean; // Importas @Bean
+import org.modelmapper.ModelMapper; // Importas ModelMapper
 
 @SpringBootApplication
 public class Application {
@@ -16,5 +17,10 @@ public class Application {
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new PasswordEncoder();
+    }
+
+    @Bean
+    public ModelMapper modelMapper() {
+        return new ModelMapper();
     }
 }
