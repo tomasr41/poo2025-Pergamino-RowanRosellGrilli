@@ -3,6 +3,7 @@ package com.ar.edu.unnoba.poo2025.torneos.service;
 import com.ar.edu.unnoba.poo2025.torneos.models.Participante;
 import com.ar.edu.unnoba.poo2025.torneos.repository.ParticipanteRepository;
 import com.ar.edu.unnoba.poo2025.torneos.util.PasswordEncoder;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -13,14 +14,15 @@ public class ParticipantServiceImp implements ParticipantService {
     private final PasswordEncoder passwordEncoder;
 
   
+    @Autowired
     public ParticipantServiceImp(ParticipanteRepository participanteRepository, PasswordEncoder passwordEncoder) {
         this.participanteRepository = participanteRepository;
         this.passwordEncoder = passwordEncoder;
     }
 
-    /**
-     * Implementación del método para crear un nuevo participante.
-     */
+
+     //Implementación del método para crear un nuevo participante.
+     
     @Override
     public void create(Participante participant) throws Exception {
         
@@ -40,4 +42,9 @@ public class ParticipantServiceImp implements ParticipantService {
         // 4. Guardar el nuevo participante en la base de datos
         participanteRepository.save(participant);
     }
+
+    @Override
+public Participante findByEmail(String email) {
+    return participanteRepository.findByEmail(email);
+}
 }

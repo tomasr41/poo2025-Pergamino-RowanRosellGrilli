@@ -11,4 +11,6 @@ public interface ParticipantService {
      */
     public void create(Participante participante) throws Exception;
 
+    public Participante findByEmail(String email);
+
 }
