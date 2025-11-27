@@ -2,10 +2,14 @@ package com.ar.edu.unnoba.poo2025.torneos.resource;
 
 import com.ar.edu.unnoba.poo2025.torneos.dto.AdminResponseDTO;
 import com.ar.edu.unnoba.poo2025.torneos.dto.AuthenticationRequestDTO;
+import com.ar.edu.unnoba.poo2025.torneos.dto.CreateTournamentRequestDTO;
+import com.ar.edu.unnoba.poo2025.torneos.dto.TournamentResponseDTO;
 import com.ar.edu.unnoba.poo2025.torneos.models.Administrador;
+import com.ar.edu.unnoba.poo2025.torneos.models.Torneo;
 import com.ar.edu.unnoba.poo2025.torneos.service.AdminService;
 import com.ar.edu.unnoba.poo2025.torneos.service.AuthenticationService;
 import com.ar.edu.unnoba.poo2025.torneos.service.AuthorizationService;
+import com.ar.edu.unnoba.poo2025.torneos.service.TournamentService;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,6 +29,7 @@ public class AdminResource {
     @Autowired private AdminService adminService;
     @Autowired private AuthenticationService authenticationService;
     @Autowired private AuthorizationService authorizationService;
+    @Autowired private TournamentService tournamentService;
     @Autowired private ModelMapper modelMapper;
 
     // 1. Login de Administrador
@@ -82,4 +87,48 @@ public class AdminResource {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
+
+    // 5. Crear torneo
+    @PostMapping("/tournaments")
+    public ResponseEntity<?> createTournament(@RequestHeader("Authorization") String token,
+                                          @RequestBody CreateTournamentRequestDTO dto) {
+    try {
+        // 1) Autorizar admin (lanza excepción si inválido)
+        Administrador admin = authorizationService.authorizeAdmin(token);
+
+        // 2) Validar DTO
+        if (dto.getStartDate() == null || dto.getFinishDate() == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "startDate y finishDate son obligatorios"));
+        }
+        if (dto.getStartDate().isAfter(dto.getFinishDate())) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(Map.of("error", "La fecha de inicio no puede ser posterior a la fecha de fin"));
+        }
+
+        // 3) Mapear DTO -> entidad
+        Torneo torneo = new Torneo();
+        torneo.setNombre(dto.getName());
+        torneo.setDescripcion(dto.getDescription());
+        torneo.setFechaInicio(dto.getStartDate());
+        torneo.setFechaFin(dto.getFinishDate());
+        torneo.setPublicado(false); // por defecto
+        torneo.setAdministrador(admin);
+
+        // 4) Guardar via service
+        Torneo saved = tournamentService.create(torneo);
+
+        // 5) Responder con DTO
+        TournamentResponseDTO resp = new TournamentResponseDTO(
+                saved.getIdTorneo() == null ? null : saved.getIdTorneo().longValue(),
+                saved.getNombre(),
+                saved.getDescripcion()
+        );
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(resp);
+
+    } catch (Exception e) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+    }
+}
 }
