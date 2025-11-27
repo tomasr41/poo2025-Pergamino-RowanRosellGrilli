@@ -1,7 +1,13 @@
 package com.ar.edu.unnoba.poo2025.torneos.service;
 
-import com.ar.edu.unnoba.poo2025.torneos.models.Participante; // OJO: Es 'Participante' en tu modelo
+import com.ar.edu.unnoba.poo2025.torneos.models.Administrador;
+import com.ar.edu.unnoba.poo2025.torneos.models.Participante;
 
 public interface AuthenticationService {
-    public String authenticate(Participante participant) throws Exception; 
+    
+    // Autenticación para Participantes (Login normal)
+    String authenticate(Participante participant) throws Exception;
+
+    // NUEVO: Autenticación para Administradores (Login admin)
+    String authenticateAdmin(Administrador admin) throws Exception;
 }
