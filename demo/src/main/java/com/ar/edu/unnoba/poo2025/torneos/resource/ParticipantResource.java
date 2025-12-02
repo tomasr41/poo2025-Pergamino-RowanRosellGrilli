@@ -34,7 +34,7 @@ public class ParticipantResource {
     }
 
     /**
-     * Método para crear un participante (registro).
+     * Registro de participante
      */
     @PostMapping
     public ResponseEntity<?> create(@RequestBody CreateParticipantRequestDTO dto) {
@@ -51,7 +51,7 @@ public class ParticipantResource {
     }
 
     /**
-     * MÉTODO: Endpoint de autenticación (login).
+     * Login de participante.
      * Recibe un JSON con email y password, y devuelve un token.
      */
     @PostMapping(value = "/auth", produces = "application/json")
