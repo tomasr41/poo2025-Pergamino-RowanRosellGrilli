@@ -45,7 +45,6 @@ public class Inscripcion {
     }
 
     public double calcularPrecioDescuento() {
-        // Ejemplo de descuento (ajustalo según tu lógica)
         return precioPagado * 0.9;
     }
 }

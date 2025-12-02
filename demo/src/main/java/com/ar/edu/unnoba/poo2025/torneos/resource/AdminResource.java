@@ -97,21 +97,21 @@ public class AdminResource {
         Administrador admin = authorizationService.authorizeAdmin(token);
 
         // 2) Validar DTO
-        if (dto.getStartDate() == null || dto.getFinishDate() == null) {
+        if (dto.getFechaInicio() == null || dto.getFechaFin() == null) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("error", "startDate y finishDate son obligatorios"));
         }
-        if (dto.getStartDate().isAfter(dto.getFinishDate())) {
+        if (dto.getFechaInicio().isAfter(dto.getFechaFin())) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                     .body(Map.of("error", "La fecha de inicio no puede ser posterior a la fecha de fin"));
         }
 
         // 3) Mapear DTO -> entidad
         Torneo torneo = new Torneo();
-        torneo.setNombre(dto.getName());
-        torneo.setDescripcion(dto.getDescription());
-        torneo.setFechaInicio(dto.getStartDate());
-        torneo.setFechaFin(dto.getFinishDate());
+        torneo.setNombre(dto.getNombre());
+        torneo.setDescripcion(dto.getDescripcion());
+        torneo.setFechaInicio(dto.getFechaInicio());
+        torneo.setFechaFin(dto.getFechaFin());
         torneo.setPublicado(false); // por defecto
         torneo.setAdministrador(admin);
 

@@ -35,7 +35,7 @@ public class AuthorizationServiceImp implements AuthorizationService {
         return user;
     }
 
-    // NUEVO: Implementación para Administradores
+    // Implementación para Administradores
     @Override
     public Administrador authorizeAdmin(String token) throws Exception {
         // 1. Verificar validez del token (firma y fecha)

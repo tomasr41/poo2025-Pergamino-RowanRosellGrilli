@@ -3,22 +3,22 @@ package com.ar.edu.unnoba.poo2025.torneos.dto;
 import java.time.LocalDate;
 
 public class CreateTournamentRequestDTO {
-    private String name;
-    private String description;
-    private LocalDate startDate;
-    private LocalDate finishDate;
+    private String nombre;
+    private String descripcion;
+    private LocalDate fechaInicio;
+    private LocalDate fechaFin;
 
     public CreateTournamentRequestDTO() {}
 
-    public String getName() { return name; }
-    public void setName(String name) { this.name = name; }
+    public String getNombre() { return nombre; }
+    public void setNombre(String nombre) { this.nombre = nombre; }
 
-    public String getDescription() { return description; }
-    public void setDescription(String description) { this.description = description; }
+    public String getDescripcion() { return descripcion; }
+    public void setDescripcion(String descripcion) { this.descripcion = descripcion; }
 
-    public LocalDate getStartDate() { return startDate; }
-    public void setStartDate(LocalDate startDate) { this.startDate = startDate; }
+    public LocalDate getFechaInicio() { return fechaInicio; }
+    public void setFechaInicio(LocalDate fechaInicio) { this.fechaInicio = fechaInicio; }
 
-    public LocalDate getFinishDate() { return finishDate; }
-    public void setFinishDate(LocalDate finishDate) { this.finishDate = finishDate; }
+    public LocalDate getFechaFin() { return fechaFin; }
+    public void setFechaFin(LocalDate fechaFin) { this.fechaFin = fechaFin; }
 }
