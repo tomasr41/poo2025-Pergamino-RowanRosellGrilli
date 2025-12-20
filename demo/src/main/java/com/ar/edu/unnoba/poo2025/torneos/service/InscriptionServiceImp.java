@@ -53,14 +53,14 @@ public class InscriptionServiceImp implements InscriptionService {
                 .anyMatch(i -> i.getCompetencia().getTorneo().getIdTorneo().equals(competencia.getTorneo().getIdTorneo()));
 
         if (tieneOtraEnMismoTorneo) {
-            precioFinal = precioFinal * 0.5; // 50% OFF
+            precioFinal = precioFinal * 0.5; // 50% DESCUENTO
         }
 
         // 6. Guardar
         Inscripcion nueva = new Inscripcion();
         nueva.setParticipante(participante);
         nueva.setCompetencia(competencia);
-        nueva.setFechaInscripcion(new Date()); // O LocalDate.now() si cambiaste el modelo
+        nueva.setFechaInscripcion(new Date());
         nueva.setPrecioPagado(precioFinal);
 
         return inscripcionRepository.save(nueva);

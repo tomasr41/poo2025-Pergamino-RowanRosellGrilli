@@ -24,7 +24,7 @@ public class JwtTokenUtil {
      * Genera un token JWT para un subject (email).
      * Expira en 10 días y usa HMAC512.
      */
-    public String generateToken(String subject) {
+    public String generateToken(String subject, String rol) {
         // El vencimiento es de 10 días (en milisegundos)
         long expirationTime = TimeUnit.DAYS.toMillis(10);
         Date expirationDate = new Date(System.currentTimeMillis() + expirationTime);
@@ -34,6 +34,7 @@ public class JwtTokenUtil {
         String token = JWT.create()
                 .withIssuer(ISSUER)
                 .withSubject(subject)
+                .withClaim("role", rol)
                 .withIssuedAt(new Date())
                 .withExpiresAt(expirationDate)
                 .sign(algorithm);
@@ -64,6 +65,10 @@ public class JwtTokenUtil {
         DecodedJWT decodedJWT = getDecodedToken(token);
         return decodedJWT.getSubject();
     }
+
+    public String getRole(String token) throws JWTVerificationException {
+        return getDecodedToken(token).getClaim("role").asString();
+    }    
 
     /**
      * Método privado para decodificar y verificar el token.

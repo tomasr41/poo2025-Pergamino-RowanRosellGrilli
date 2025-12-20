@@ -24,10 +24,15 @@ public class AuthorizationServiceImp implements AuthorizationService {
         // 1. Verificar validez del token
         if (!jwtTokenUtil.verify(token)) throw new Exception("Token inválido.");
         
-        // 2. Obtener email
+        // 2. Verificar rol
+        if (!"PARTICIPANTE".equals(jwtTokenUtil.getRole(token))) {
+            throw new Exception("Acceso denegado: token no corresponde a participante.");
+        }
+
+        // 3. Obtener email
         String email = jwtTokenUtil.getSubject(token);
         
-        // 3. Buscar solo en Participantes
+        // 4. Buscar solo en Participantes
         Participante user = participantService.findByEmail(email);
         
         if (user == null) throw new Exception("Usuario no encontrado o no es un participante.");
@@ -38,15 +43,21 @@ public class AuthorizationServiceImp implements AuthorizationService {
     // Implementación para Administradores
     @Override
     public Administrador authorizeAdmin(String token) throws Exception {
+        
         // 1. Verificar validez del token (firma y fecha)
         if (!jwtTokenUtil.verify(token)) {
             throw new Exception("Token inválido o expirado.");
         }
 
-        // 2. Obtener el email del payload
+        // 2. Verificar rol
+        if (!"ADMIN".equals(jwtTokenUtil.getRole(token))) {
+            throw new Exception("Acceso denegado: token no corresponde a administrador.");
+        }
+
+        // 3. Obtener el email del payload
         String email = jwtTokenUtil.getSubject(token);
         
-        // 3. Buscar ESPECÍFICAMENTE en la tabla de administradores
+        // 4. Buscar ESPECÍFICAMENTE en la tabla de administradores
         Administrador admin = adminService.findByEmail(email);
         
         // 4. Si no existe como admin, denegar acceso

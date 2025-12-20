@@ -38,7 +38,7 @@ public class AuthenticationServiceImp implements AuthenticationService {
         }
 
         // 3. Generamos el token
-        return jwtTokenUtil.generateToken(user.getEmail());
+        return jwtTokenUtil.generateToken(user.getEmail(), "PARTICIPANTE");
     }
 
     // Implementación para Administradores (Login Admin)
@@ -60,6 +60,6 @@ public class AuthenticationServiceImp implements AuthenticationService {
         // 3. Generamos el token
         // Nota: El token es igual, pero quien lo posea solo podrá pasar 
         // por los filtros de AuthorizationService.authorizeAdmin()
-        return jwtTokenUtil.generateToken(user.getEmail());
+        return jwtTokenUtil.generateToken(user.getEmail(), "ADMIN");
     }
 }
