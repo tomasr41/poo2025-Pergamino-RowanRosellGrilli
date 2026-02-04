@@ -1,8 +1,6 @@
 package com.ar.edu.unnoba.poo2025.torneos.service;
 
 import java.util.List;
-import java.util.Optional;
-
 import org.springframework.stereotype.Service;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,6 +22,7 @@ public class TournamentServiceImp implements TournamentService {
 
     @Override
     public List<Torneo> getPublishedTournaments() {
+        // Retorna solo los torneos que tienen el flag 'publicado' en true 
         return tournamentRepository.findByPublicadoTrue();
     }
 
@@ -32,70 +31,59 @@ public class TournamentServiceImp implements TournamentService {
     @Override
     @Transactional
     public Torneo create(Torneo torneo) throws Exception {
-        // Validaciones básicas de fechas
-        if (torneo.getFechaInicio() == null || torneo.getFechaFin() == null) {
-            throw new Exception("Fecha de inicio y fin son obligatorias.");
-        }
-        if (torneo.getFechaInicio().isAfter(torneo.getFechaFin())) {
-            throw new Exception("La fecha de inicio no puede ser posterior a la fecha de fin.");
-        }
-        // Por defecto no publicado
+        // 1. Validar que las fechas no sean nulas y que el orden sea cronológico 
+        validateDates(torneo);
+        
+        // 2. Por defecto, un torneo recién creado es un borrador (no publicado) 
         torneo.setPublicado(false);
+        
+        // 3. Guardar en la base de datos y retornar la entidad persistida (con su ID) 
         return tournamentRepository.save(torneo);
     }
 
-    // Sobrecarga para usar cuando pasamos el creador explícitamente (si hiciera falta)
     @Override
     @Transactional
     public void create(Torneo torneo, Administrador creador) {
         try {
-            // Reutilizamos la lógica de validación
-            if (torneo.getFechaInicio() == null || torneo.getFechaFin() == null) {
-                throw new RuntimeException("Fecha de inicio y fin son obligatorias.");
-            }
-            if (torneo.getFechaInicio().isAfter(torneo.getFechaFin())) {
-                throw new RuntimeException("La fecha de inicio no puede ser posterior a la fecha de fin.");
-            }
-            
-            torneo.setPublicado(false);
+            // Asignar el administrador responsable del torneo 
             torneo.setAdministrador(creador);
-            tournamentRepository.save(torneo);
+            // Reutilizar la lógica de creación y validación principal 
+            this.create(torneo);
         } catch (Exception e) {
+            // Convertir la excepción comprobada a Runtime para manejarla en el flujo de Spring 
             throw new RuntimeException(e.getMessage());
         }
     }
 
     @Override
     public List<Torneo> getAll() {
-        // Retorna todos los torneos ordenados por fecha de inicio descendente
-        // Asegúrate de tener este método en tu repositorio o usar findAll() con Sort
+        // Retorna todos los torneos (publicados o no) ordenados por fecha de inicio descendente 
         return tournamentRepository.findAllByOrderByFechaInicioDesc();
     }
 
     @Override
     public Torneo getById(Integer id) {
+        // Busca un torneo por su ID 
         return tournamentRepository.findById(id).orElse(null);
     }
 
     @Override
     @Transactional
     public void update(Integer id, Torneo torneoActualizado) throws Exception {
+        // 1. Verificar existencia del torneo original 
         Torneo torneo = tournamentRepository.findById(id)
                 .orElseThrow(() -> new Exception("Torneo no encontrado con ID: " + id));
         
-        // Actualizamos solo los campos permitidos
+        // 2. Validar los nuevos datos de fecha 
+        validateDates(torneoActualizado);
+
+        // 3. Actualizar campos permitidos (Nombre, Descripción y Fechas) 
         torneo.setNombre(torneoActualizado.getNombre());
         torneo.setDescripcion(torneoActualizado.getDescripcion());
-        
-        // Validar fechas nuevamente si cambian
-        if (torneoActualizado.getFechaInicio() != null && torneoActualizado.getFechaFin() != null) {
-             if (torneoActualizado.getFechaInicio().isAfter(torneoActualizado.getFechaFin())) {
-                throw new Exception("La fecha de inicio no puede ser posterior a la fecha de fin.");
-            }
-            torneo.setFechaInicio(torneoActualizado.getFechaInicio());
-            torneo.setFechaFin(torneoActualizado.getFechaFin());
-        }
+        torneo.setFechaInicio(torneoActualizado.getFechaInicio());
+        torneo.setFechaFin(torneoActualizado.getFechaFin());
 
+        // 4. Persistir los cambios 
         tournamentRepository.save(torneo);
     }
 
@@ -103,7 +91,7 @@ public class TournamentServiceImp implements TournamentService {
     @Transactional
     public void delete(Integer id) throws Exception {
         if (!tournamentRepository.existsById(id)) {
-            throw new Exception("Torneo no encontrado con ID: " + id);
+            throw new Exception("Torneo no encontrado");
         }
         tournamentRepository.deleteById(id);
     }
@@ -112,9 +100,22 @@ public class TournamentServiceImp implements TournamentService {
     @Transactional
     public void publish(Integer id) throws Exception {
         Torneo torneo = tournamentRepository.findById(id)
-                .orElseThrow(() -> new Exception("Torneo no encontrado con ID: " + id));
+                .orElseThrow(() -> new Exception("Torneo no encontrado"));
         
+        // Cambiar el estado a publicado para que sea visible por los participantes 
         torneo.setPublicado(true);
         tournamentRepository.save(torneo);
+    }
+
+    /**
+     * Centraliza la lógica de validación de fechas para evitar inconsistencias.
+     */
+    private void validateDates(Torneo torneo) throws Exception {
+        if (torneo.getFechaInicio() == null || torneo.getFechaFin() == null) {
+            throw new Exception("Las fechas de inicio y fin son obligatorias.");
+        }
+        if (torneo.getFechaInicio().isAfter(torneo.getFechaFin())) {
+            throw new Exception("La fecha de inicio no puede ser posterior a la fecha de fin.");
+        }
     }
 }

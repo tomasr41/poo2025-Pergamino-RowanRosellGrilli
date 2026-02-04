@@ -44,7 +44,8 @@ public class Inscripcion {
         this.precioPagado = precioPagado;
     }
 
-    public double calcularPrecioDescuento() {
-        return precioPagado * 0.9;
-    }
+  //  public double calcularPrecioDescuento() {
+       
+        
+    //}
 }

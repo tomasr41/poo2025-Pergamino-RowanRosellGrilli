@@ -16,6 +16,7 @@ import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/admin")
@@ -60,7 +61,7 @@ public class AdminResource {
 
     @PostMapping("/accounts")
     public ResponseEntity<?> createAccount(@RequestHeader("Authorization") String token, 
-                                           @RequestBody CreateAdminRequestDTO request) { // Usamos el DTO correcto
+                                           @RequestBody CreateAdminRequestDTO request) {
         try {
             authorizationService.authorizeAdmin(token);
             Administrador newAdmin = modelMapper.map(request, Administrador.class);
@@ -87,16 +88,16 @@ public class AdminResource {
     // 2. GESTIÓN DE TORNEOS (CRUD COMPLETO)
     // ==========================================
 
-    // Listar TODOS los torneos (para admin, incluye no publicados)
     @GetMapping("/tournaments")
     public ResponseEntity<?> getAllTournaments(@RequestHeader("Authorization") String token) {
         try {
             authorizationService.authorizeAdmin(token);
             List<Torneo> torneos = tournamentService.getAll();
             
-            
-            Type listType = new TypeToken<List<TournamentResponseDTO>>() {}.getType();
-            List<TournamentResponseDTO> dtos = modelMapper.map(torneos, listType);
+            // CORRECCIÓN: Mapeo manual para asegurar que se use el constructor de 6 parámetros y @JsonFormat
+            List<TournamentResponseDTO> dtos = torneos.stream()
+                    .map(this::convertToResponseDTO)
+                    .collect(Collectors.toList());
             
             return ResponseEntity.ok(dtos);
         } catch (Exception e) {
@@ -104,7 +105,6 @@ public class AdminResource {
         }
     }
 
-    // Obtener un torneo específico
     @GetMapping("/tournaments/{id}")
     public ResponseEntity<?> getTournament(@RequestHeader("Authorization") String token, 
                                            @PathVariable Integer id) {
@@ -116,31 +116,24 @@ public class AdminResource {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Torneo no encontrado");
             }
 
-            TournamentResponseDTO dto = modelMapper.map(torneo, TournamentResponseDTO.class);
-            return ResponseEntity.ok(dto);
+            // CORRECCIÓN: Usar el método auxiliar para el DTO con fechas
+            return ResponseEntity.ok(convertToResponseDTO(torneo));
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         }
     }
 
-    // Crear torneo
     @PostMapping("/tournaments")
     public ResponseEntity<?> createTournament(@RequestHeader("Authorization") String token,
-                                              @RequestBody CreateTournamentRequestDTO dto) { // Usamos el DTO de creación
+                                              @RequestBody CreateTournamentRequestDTO dto) { 
         try {
             Administrador admin = authorizationService.authorizeAdmin(token);
 
-            // Validaciones de fechas
             if (dto.getFechaInicio() == null || dto.getFechaFin() == null) {
                 return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                         .body(Map.of("error", "Las fechas son obligatorias"));
             }
-            if (dto.getFechaInicio().isAfter(dto.getFechaFin())) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(Map.of("error", "La fecha de inicio no puede ser posterior al fin"));
-            }
 
-            // Mapeo manual para asegurar nombres correctos
             Torneo torneo = new Torneo();
             torneo.setNombre(dto.getNombre());
             torneo.setDescripcion(dto.getDescripcion());
@@ -149,21 +142,16 @@ public class AdminResource {
             torneo.setPublicado(false);
             torneo.setAdministrador(admin);
 
-            Torneo saved = tournamentService.create(torneo); // Asumo que cambiaste el servicio para devolver Torneo
+            Torneo saved = tournamentService.create(torneo); 
 
-            TournamentResponseDTO resp = new TournamentResponseDTO(
-                    saved.getIdTorneo() == null ? null : saved.getIdTorneo().longValue(),
-                    saved.getNombre(),
-                    saved.getDescripcion()
-            );
+            // Devolvemos el DTO completo
+            return ResponseEntity.status(HttpStatus.CREATED).body(convertToResponseDTO(saved));
 
-            return ResponseEntity.status(HttpStatus.CREATED).body(resp);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(Map.of("error", e.getMessage()));
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
         }
     }
 
-    // Actualizar torneo
     @PutMapping("/tournaments/{id}")
     public ResponseEntity<?> updateTournament(@RequestHeader("Authorization") String token, 
                                               @PathVariable Integer id,
@@ -171,7 +159,6 @@ public class AdminResource {
         try {
             authorizationService.authorizeAdmin(token);
             
-            // Mapeamos los datos nuevos
             Torneo datosNuevos = new Torneo();
             datosNuevos.setNombre(dto.getNombre());
             datosNuevos.setDescripcion(dto.getDescripcion());
@@ -179,14 +166,12 @@ public class AdminResource {
             datosNuevos.setFechaFin(dto.getFechaFin());
             
             tournamentService.update(id, datosNuevos);
-            
             return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         }
     }
 
-    // Borrar torneo
     @DeleteMapping("/tournaments/{id}")
     public ResponseEntity<?> deleteTournament(@RequestHeader("Authorization") String token, 
                                               @PathVariable Integer id) {
@@ -199,7 +184,6 @@ public class AdminResource {
         }
     }
     
-    // Publicar torneo
     @PatchMapping("/tournaments/{id}/published")
     public ResponseEntity<?> publishTournament(@RequestHeader("Authorization") String token, 
                                                @PathVariable Integer id) {
@@ -212,11 +196,10 @@ public class AdminResource {
         }
     }
 
-   // ==========================================
+    // ==========================================
     // 3. GESTIÓN DE COMPETENCIAS (ADMIN)
     // ==========================================
 
-    // Crear Competencia: POST /admin/tournaments/{id}/competitions
     @PostMapping("/tournaments/{id}/competitions")
     public ResponseEntity<?> createCompetition(@RequestHeader("Authorization") String token,
                                                @PathVariable Integer id,
@@ -236,20 +219,32 @@ public class AdminResource {
         }
     }
 
-    // Listar Competencias de un Torneo (Admin): GET /admin/tournaments/{id}/competitions
     @GetMapping("/tournaments/{id}/competitions")
     public ResponseEntity<?> getCompetitionsAdmin(@RequestHeader("Authorization") String token,
                                                   @PathVariable Integer id) {
         try {
             authorizationService.authorizeAdmin(token);
             List<Competencia> comps = competitionService.getAllByTournament(id);
-            
             Type listType = new TypeToken<List<CompetitionResponseDTO>>() {}.getType();
             List<CompetitionResponseDTO> dtos = modelMapper.map(comps, listType);
-            
             return ResponseEntity.ok(dtos);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.FORBIDDEN).body(e.getMessage());
         }
+    }
+
+    /**
+     * MÉTODO AUXILIAR: Convierte una Entidad Torneo al DTO de respuesta
+     * Asegura que el constructor de 6 parámetros se llame correctamente.
+     */
+    private TournamentResponseDTO convertToResponseDTO(Torneo t) {
+        return new TournamentResponseDTO(
+                t.getIdTorneo() == null ? null : t.getIdTorneo().longValue(),
+                t.getNombre(),
+                t.getDescripcion(),
+                t.getFechaInicio(),
+                t.getFechaFin(),
+                t.isPublicado()
+        );
     }
 }
