@@ -230,6 +230,19 @@ public class AdminResource {
         }
     }
 
+    @DeleteMapping("/competitions/{id}")
+    public ResponseEntity<?> deleteCompetition(@RequestHeader("Authorization") String token,
+                                            @PathVariable Integer id) {
+        try {
+            authorizationService.authorizeAdmin(token);
+            competitionService.delete(id);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
+
+
     /**
      * MÉTODO AUXILIAR: Convierte una Entidad Torneo al DTO de respuesta
      * Asegura que el constructor de 6 parámetros se llame correctamente.

@@ -41,8 +41,8 @@ const AdminTournaments: React.FC = () => {
     try {
       await adminService.deleteTournament(id);
       fetchTournaments();
-    } catch (error) {
-      alert('Error al eliminar el torneo');
+    } catch (error: any) {
+      alert(error.response?.data?.error || error.response?.data || 'Error al eliminar el torneo');
     }
   };
 

@@ -8,4 +8,6 @@ import java.util.List;
 @Repository
 public interface CompetitionRepository extends JpaRepository<Competencia, Integer> {
     List<Competencia> findByTorneo_IdTorneo(Integer idTorneo);
+    boolean existsByTorneo_IdTorneo(Integer idTorneo);
+
 }

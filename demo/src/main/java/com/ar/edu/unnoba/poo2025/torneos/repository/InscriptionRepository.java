@@ -32,4 +32,6 @@ public interface InscriptionRepository extends JpaRepository<Inscripcion, Long> 
      */
     Optional<Inscripcion> findByParticipanteAndCompetencia(Participante participante, Competencia competencia);
 
+    boolean existsByCompetencia_IdCompetencia(Long idCompetencia);
+
 }

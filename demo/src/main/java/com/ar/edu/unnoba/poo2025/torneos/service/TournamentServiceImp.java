@@ -7,16 +7,23 @@ import org.springframework.transaction.annotation.Transactional;
 import com.ar.edu.unnoba.poo2025.torneos.repository.TournamentRepository;
 import com.ar.edu.unnoba.poo2025.torneos.models.Torneo;
 import com.ar.edu.unnoba.poo2025.torneos.models.Administrador;
+import com.ar.edu.unnoba.poo2025.torneos.repository.CompetitionRepository;
+
 
 @Service
 public class TournamentServiceImp implements TournamentService {
 
     private final TournamentRepository tournamentRepository;
+    private final CompetitionRepository competitionRepository;
 
     @Autowired
-    public TournamentServiceImp(TournamentRepository tournamentRepository) {
+    public TournamentServiceImp(TournamentRepository tournamentRepository,
+                                CompetitionRepository competitionRepository) {
         this.tournamentRepository = tournamentRepository;
+        this.competitionRepository = competitionRepository;
     }
+
+   
 
     // --- MÉTODOS PÚBLICOS (PARTICIPANTES) ---
 
@@ -92,6 +99,9 @@ public class TournamentServiceImp implements TournamentService {
     public void delete(Integer id) throws Exception {
         if (!tournamentRepository.existsById(id)) {
             throw new Exception("Torneo no encontrado");
+        }
+        if (competitionRepository.existsByTorneo_IdTorneo(id)) {
+            throw new Exception("No se puede eliminar el torneo: tiene competencias creadas.");
         }
         tournamentRepository.deleteById(id);
     }

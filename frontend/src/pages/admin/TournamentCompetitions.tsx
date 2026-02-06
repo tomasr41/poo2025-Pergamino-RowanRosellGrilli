@@ -6,6 +6,7 @@ import Button from '../../components/Button';
 import Card from '../../components/Card';
 import Spinner from '../../components/Spinner';
 import CompetitionFormModal from './CompetitionFormModal';
+import { Trash2 } from 'lucide-react';
 
 const TournamentCompetitions: React.FC = () => {
   const { id } = useParams<{ id: string }>();
@@ -46,6 +47,21 @@ const TournamentCompetitions: React.FC = () => {
     );
   }
 
+
+
+const handleDeleteCompetition = async (competitionId: number) => {
+  if (!confirm('¿Seguro que querés eliminar esta competencia?')) return;
+
+  try {
+    await adminService.deleteCompetition(competitionId);
+    fetchData();
+  } catch (err: any) {
+    alert(err.response?.data?.error || 'No se pudo eliminar la competencia');
+  }
+};
+
+
+
   return (
     <div>
       <div className="mb-6">
@@ -72,21 +88,32 @@ const TournamentCompetitions: React.FC = () => {
         ) : (
           competitions.map((competition) => (
             <Card key={competition.idCompetencia} className="p-6">
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                {competition.nombre}
-              </h3>
-              <div className="space-y-1 text-sm text-gray-600">
-                <p>
-                  <span className="font-medium">Precio Base:</span> ${competition.precioBase}
-                </p>
-                <p>
-                  <span className="font-medium">Cupo:</span> {competition.cupo} participantes
-                </p>
+              <div className="flex justify-between items-start gap-3">  
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  {competition.nombre}
+                </h3>
+
+                <Button
+                  size="sm"
+                  variant="danger"
+                  onClick={() => handleDeleteCompetition(competition.idCompetencia)}
+                >
+                  <Trash2 size={16} />
+                </Button>
               </div>
-            </Card>
-          ))
-        )}
-      </div>
+
+                <div className="space-y-1 text-sm text-gray-600">
+                  <p>
+                    <span className="font-medium">Precio Base:</span> ${competition.precioBase}
+                  </p>
+                  <p>
+                    <span className="font-medium">Cupo:</span> {competition.cupo} participantes
+                  </p>
+                </div>
+              </Card>
+            ))
+          )}
+        </div>
 
       <CompetitionFormModal
         isOpen={showModal}

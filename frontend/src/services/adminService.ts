@@ -63,4 +63,9 @@ export const adminService = {
   ): Promise<void> => {
     await axiosInstance.post(API_ENDPOINTS.ADMIN.COMPETITIONS(tournamentId), data);
   },
+
+  deleteCompetition: async (competitionId: number): Promise<void> => {
+    await axiosInstance.delete(`/admin/competitions/${competitionId}`);
+  },
+
 };
