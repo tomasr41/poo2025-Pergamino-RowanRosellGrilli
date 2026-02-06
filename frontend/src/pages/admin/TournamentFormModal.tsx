@@ -5,6 +5,20 @@ import Button from '../../components/Button';
 import { adminService } from '../../services/adminService';
 import { Torneo } from '../../types';
 
+const todayStr = (() => {
+  const d = new Date();                // reloj local del dispositivo
+  const y = d.getFullYear();
+  const m = String(d.getMonth() + 1).padStart(2, '0');
+  const day = String(d.getDate()).padStart(2, '0');
+  return `${y}-${m}-${day}`;           // formato yyyy-MM-dd
+})();
+
+const parseLocalDate = (iso: string) => {
+  const [y, m, d] = iso.split('-').map(Number);
+  return new Date(y, m - 1, d); // fecha LOCAL
+};
+
+
 interface TournamentFormModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -47,6 +61,25 @@ const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
+    const ini = parseLocalDate(formData.fechaInicio);
+    ini.setHours(0, 0, 0, 0);
+
+    const fin = parseLocalDate(formData.fechaFin);
+    fin.setHours(0, 0, 0, 0);
+
+    if (ini < today) {
+      setError('La fecha de inicio no puede ser anterior a hoy.');
+      return;
+    }
+
+    if (fin < ini) {
+      setError('La fecha de fin no puede ser anterior a la fecha de inicio.');
+      return;
+    }
+
     setError('');
     setLoading(true);
 
@@ -106,6 +139,7 @@ const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
           label="Fecha de Inicio"
           type="date"
           required
+          min={todayStr}
           value={formData.fechaInicio}
           onChange={(e) => setFormData({ ...formData, fechaInicio: e.target.value })}
         />
@@ -113,6 +147,7 @@ const TournamentFormModal: React.FC<TournamentFormModalProps> = ({
           label="Fecha de Fin"
           type="date"
           required
+          min={formData.fechaInicio || todayStr}
           value={formData.fechaFin}
           onChange={(e) => setFormData({ ...formData, fechaFin: e.target.value })}
         />

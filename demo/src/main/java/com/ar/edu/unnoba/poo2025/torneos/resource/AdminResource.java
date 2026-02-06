@@ -17,6 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import jakarta.validation.Valid;
+
 
 @RestController
 @RequestMapping("/admin")
@@ -125,14 +127,9 @@ public class AdminResource {
 
     @PostMapping("/tournaments")
     public ResponseEntity<?> createTournament(@RequestHeader("Authorization") String token,
-                                              @RequestBody CreateTournamentRequestDTO dto) { 
+                                              @Valid @RequestBody CreateTournamentRequestDTO dto) { 
         try {
             Administrador admin = authorizationService.authorizeAdmin(token);
-
-            if (dto.getFechaInicio() == null || dto.getFechaFin() == null) {
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                        .body(Map.of("error", "Las fechas son obligatorias"));
-            }
 
             Torneo torneo = new Torneo();
             torneo.setNombre(dto.getNombre());

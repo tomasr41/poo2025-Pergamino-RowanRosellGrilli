@@ -102,8 +102,8 @@ public class TournamentServiceImp implements TournamentService {
         Torneo torneo = tournamentRepository.findById(id)
                 .orElseThrow(() -> new Exception("Torneo no encontrado"));
         
-        // Cambiar el estado a publicado para que sea visible por los participantes 
-        torneo.setPublicado(true);
+        // Cambia el estado el estado de publicación (toggle) 
+        torneo.setPublicado(!torneo.isPublicado());
         tournamentRepository.save(torneo);
     }
 
@@ -113,6 +113,9 @@ public class TournamentServiceImp implements TournamentService {
     private void validateDates(Torneo torneo) throws Exception {
         if (torneo.getFechaInicio() == null || torneo.getFechaFin() == null) {
             throw new Exception("Las fechas de inicio y fin son obligatorias.");
+        }
+        if (torneo.getFechaInicio().isBefore(java.time.LocalDate.now())) {
+            throw new Exception("La fecha de inicio no puede ser anterior a hoy.");
         }
         if (torneo.getFechaInicio().isAfter(torneo.getFechaFin())) {
             throw new Exception("La fecha de inicio no puede ser posterior a la fecha de fin.");

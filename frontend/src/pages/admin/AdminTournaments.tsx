@@ -14,6 +14,12 @@ const AdminTournaments: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [editingTournament, setEditingTournament] = useState<Torneo | null>(null);
 
+  const formatLocalDate = (iso: string) => {
+    const [y, m, d] = iso.split('-').map(Number);
+    return new Date(y, m - 1, d).toLocaleDateString();
+  };
+
+
   const fetchTournaments = async () => {
     try {
       setLoading(true);
@@ -105,8 +111,7 @@ const AdminTournaments: React.FC = () => {
                   </div>
                   <p className="text-gray-600 mt-2">{tournament.descripcion}</p>
                   <p className="text-sm text-gray-500 mt-2">
-                    {new Date(tournament.fechaInicio).toLocaleDateString()} -{' '}
-                    {new Date(tournament.fechaFin).toLocaleDateString()}
+                    {formatLocalDate(tournament.fechaInicio)} - {formatLocalDate(tournament.fechaFin)}
                   </p>
                 </div>
                 <div className="flex gap-2 ml-4">
