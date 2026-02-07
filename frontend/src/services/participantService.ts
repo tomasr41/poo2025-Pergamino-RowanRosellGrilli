@@ -35,4 +35,21 @@ export const participantService = {
     );
     return response.data;
   },
+
+  isInscribed: async (tournamentId: number, compId: number): Promise<boolean> => {
+    const res = await axiosInstance.get<{ inscripto: boolean }>(
+      `/competitions/${compId}/is-inscribed`
+    );
+    return res.data.inscripto;
+  },
+
+  previewInscription: async (tournamentId: number, competitionId: number) => {
+    const res = await axiosInstance.get<{
+      precioBase: number;
+      descuento: number;
+      precioFinal: number;
+    }>(`/tournament/${tournamentId}/competitions/${competitionId}/inscription/preview`);
+    return res.data;
+  },
+
 };

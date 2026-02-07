@@ -117,9 +117,42 @@ public class TournamentResource {
         }
     }
 
+    @GetMapping("/competitions/{compId}/is-inscribed")
+    public ResponseEntity<?> isInscribed(@RequestHeader("Authorization") String token,
+                                        @PathVariable Integer compId) {
+        try {
+            Participante p = authorizationService.authorize(token); // participante logueado
+
+            boolean inscripto = inscriptionService.isInscribed(p, compId);
+
+            return ResponseEntity.ok(Map.of("inscripto", inscripto));
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN)
+                    .body(Map.of("error", e.getMessage()));
+        }
+    }
+
+
     // ==========================================
     // 3. INSCRIPCIONES
     // ==========================================
+
+    // Preview del precio (sin inscribir)
+    // GET /tournament/{id}/competitions/{compId}/inscription/preview
+    @GetMapping("/tournament/{id}/competitions/{compId}/inscription/preview")
+    public ResponseEntity<?> previewInscription(@RequestHeader("Authorization") String token,
+                                                @PathVariable Integer id,
+                                                @PathVariable Integer compId) {
+        try {
+            Participante p = authorizationService.authorize(token);
+
+            Map<String, Object> preview = inscriptionService.preview(p, compId);
+
+            return ResponseEntity.ok(preview);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body(Map.of("error", e.getMessage()));
+        }
+    }
 
     // Inscribirse a una competencia
     // POST /tournament/{id}/competitions/{compId}/inscription

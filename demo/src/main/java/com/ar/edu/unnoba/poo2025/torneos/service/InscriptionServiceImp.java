@@ -12,6 +12,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.Date;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class InscriptionServiceImp implements InscriptionService {
@@ -69,5 +70,38 @@ public class InscriptionServiceImp implements InscriptionService {
     @Override
     public List<Inscripcion> getInscripcionesPorParticipante(Participante participante) {
         return inscripcionRepository.findByParticipante(participante);
+    }
+
+    @Override
+    public boolean isInscribed(Participante participante, Integer competenciaId) {
+        Competencia competencia = competitionRepository.findById(competenciaId).orElse(null);
+        if (competencia == null) return false;
+
+        return inscripcionRepository
+                .findByParticipanteAndCompetencia(participante, competencia)
+                .isPresent();
+    }
+
+    @Override
+    public Map<String, Object> preview(Participante participante, Integer competitionId) throws Exception {
+        Competencia competencia = competitionRepository.findById(competitionId)
+                .orElseThrow(() -> new Exception("Competencia no encontrada"));
+
+        // misma lógica de descuento, pero SIN guardar
+        double precioBase = competencia.getPrecioBase();
+
+        List<Inscripcion> misInscripciones = inscripcionRepository.findByParticipante(participante);
+        boolean tieneOtraEnMismoTorneo = misInscripciones.stream()
+                .anyMatch(i -> i.getCompetencia().getTorneo().getIdTorneo()
+                        .equals(competencia.getTorneo().getIdTorneo()));
+
+        double descuento = tieneOtraEnMismoTorneo ? 0.5 : 0.0;
+        double precioFinal = precioBase * (1 - descuento);
+
+        return Map.of(
+                "precioBase", precioBase,
+                "descuento", descuento,
+                "precioFinal", precioFinal
+        );
     }
 }

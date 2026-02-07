@@ -17,6 +17,9 @@ const TournamentDetail: React.FC = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedCompetition, setSelectedCompetition] = useState<Competencia | null>(null);
   const [inscriptionResult, setInscriptionResult] = useState<{ precioPagado: number } | null>(null);
+  const [inscribedMap, setInscribedMap] = useState<Record<number, boolean>>({});
+  const [pricePreview, setPricePreview] = useState<{ precioBase: number; descuento: number; precioFinal: number } | null>(null);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -26,6 +29,19 @@ const TournamentDetail: React.FC = () => {
         const competitionsData = await participantService.getCompetitions(Number(id));
         setTournament(tournamentData);
         setCompetitions(competitionsData);
+        const entries = await Promise.all(
+          competitionsData.map(async (c) => {
+            try {
+              const inscripto = await participantService.isInscribed(Number(id), c.idCompetencia);
+              return [c.idCompetencia, inscripto] as const;
+            } catch (e) {
+              return [c.idCompetencia, false] as const; // si falla, no rompe todo
+            }
+          })
+        );
+        setInscribedMap(Object.fromEntries(entries));
+
+
       } catch (error) {
         console.error('Error fetching data:', error);
       } finally {
@@ -36,10 +52,19 @@ const TournamentDetail: React.FC = () => {
     fetchData();
   }, [id]);
 
-  const handleInscribeClick = (competition: Competencia) => {
+  const handleInscribeClick = async (competition: Competencia) => {
     setSelectedCompetition(competition);
     setShowModal(true);
+
+    try {
+      const preview = await participantService.previewInscription(Number(id), competition.idCompetencia);
+
+      setPricePreview(preview);
+    } catch (error: any) {
+      setPricePreview(null);
+    }
   };
+
 
   const handleInscribe = async () => {
     if (!selectedCompetition) return;
@@ -51,6 +76,8 @@ const TournamentDetail: React.FC = () => {
         selectedCompetition.idCompetencia
       );
       setInscriptionResult(result);
+      setInscribedMap(prev => ({ ...prev, [selectedCompetition.idCompetencia]: true }));
+
     } catch (error: any) {
       alert(error.response?.data?.error || 'Error al inscribirse');
       setShowModal(false);
@@ -63,6 +90,7 @@ const TournamentDetail: React.FC = () => {
     setShowModal(false);
     setSelectedCompetition(null);
     setInscriptionResult(null);
+    setPricePreview(null);
   };
 
   if (loading) {
@@ -123,9 +151,11 @@ const TournamentDetail: React.FC = () => {
               </div>
               <Button
                 className="w-full"
+                variant={inscribedMap[competition.idCompetencia] ? 'success' : 'primary'}
                 onClick={() => handleInscribeClick(competition)}
+                disabled={!!inscribedMap[competition.idCompetencia]}
               >
-                Inscribirse
+                {inscribedMap[competition.idCompetencia] ? 'Inscripto' : 'Inscribirse'}
               </Button>
             </Card>
           ))}
@@ -173,9 +203,22 @@ const TournamentDetail: React.FC = () => {
               ¿Estás seguro de inscribirte en la competencia{' '}
               <span className="font-semibold">{selectedCompetition?.nombre}</span>?
             </p>
-            <p className="text-lg font-medium text-gray-900 mb-6">
-              Precio: ${selectedCompetition?.precioBase}
-            </p>
+            <div className="text-gray-900 mb-6 space-y-1">
+              <p className="text-lg">
+                Precio: ${pricePreview?.precioBase ?? selectedCompetition?.precioBase}
+              </p>
+              {pricePreview && pricePreview.descuento > 0 && (
+                <>
+                  <p className="text-gray-700">
+                    Descuento: {Math.round(pricePreview.descuento * 100)}%
+                  </p>
+                  <p className="text-lg font-semibold">
+                    Total: ${pricePreview.precioFinal.toFixed(2)}
+                  </p>
+                </>
+              )}
+            </div>
+
             <div className="flex justify-end gap-3">
               <Button variant="secondary" onClick={handleCloseModal} disabled={inscribing}>
                 Cancelar

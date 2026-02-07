@@ -34,4 +34,5 @@ public interface InscriptionRepository extends JpaRepository<Inscripcion, Long> 
 
     boolean existsByCompetencia_IdCompetencia(Long idCompetencia);
 
+    
 }

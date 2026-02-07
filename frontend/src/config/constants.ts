@@ -20,6 +20,8 @@ export const API_ENDPOINTS = {
     INSCRIPTIONS: '/inscriptions',
     INSCRIBE: (tournamentId: number, competitionId: number) =>
       `/tournament/${tournamentId}/competitions/${competitionId}/inscription`,
+    IS_INSCRIBED: (tournamentId: number, competitionId: number) =>
+    `/tournament/${tournamentId}/competitions/${competitionId}/is-inscribed`,
   },
 };
 
