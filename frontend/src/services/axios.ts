@@ -25,10 +25,15 @@ axiosInstance.interceptors.response.use(
   (response) => response,
   (error) => {
     if (error.response?.status === 401 || error.response?.status === 403) {
-      localStorage.removeItem(STORAGE_KEYS.TOKEN);
-      localStorage.removeItem(STORAGE_KEYS.USER_ROLE);
-      localStorage.removeItem(STORAGE_KEYS.USER_EMAIL);
-      window.location.href = '/login';
+      const token = localStorage.getItem(STORAGE_KEYS.TOKEN);
+      // Solo redirigir si ya hay un token guardado (sesión expirada)
+      // Si no hay token, es un error de login, dejar que se maneje en el componente
+      if (token) {
+        localStorage.removeItem(STORAGE_KEYS.TOKEN);
+        localStorage.removeItem(STORAGE_KEYS.USER_ROLE);
+        localStorage.removeItem(STORAGE_KEYS.USER_EMAIL);
+        window.location.href = '/login';
+      }
     }
     return Promise.reject(error);
   }
